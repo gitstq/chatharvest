@@ -1,0 +1,42 @@
+[
+  {
+    "id": "sample-001",
+    "source": "claude-code",
+    "title": "Docker Compose Setup for FastAPI",
+    "created_at": "2026-08-15T10:30:00Z",
+    "updated_at": "2026-08-15T11:15:00Z",
+    "model": "claude-sonnet-4-20250514",
+    "messages": [
+      {"role": "user", "content": "How do I set up docker compose for a FastAPI app with PostgreSQL?", "tokens_input": 25},
+      {"role": "assistant", "content": "Here's a complete docker-compose.yml setup:\n```yaml\nversion: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    depends_on:\n      - db\n    environment:\n      - DATABASE_URL=postgresql://user:pass@db:5432/app\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_USER=user\n      - POSTGRES_PASSWORD=pass\n      - POSTGRES_DB=app\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:\n```\n\nAnd a Dockerfile:\n```dockerfile\nFROM python:3.12-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\"]\n```", "tokens_output": 320, "model": "claude-sonnet-4-20250514"},
+      {"role": "user", "content": "How do I add Redis for caching?", "tokens_input": 15},
+      {"role": "assistant", "content": "Add a Redis service to your docker-compose.yml:\n```yaml\n  redis:\n    image: redis:7-alpine\n    ports:\n      - \"6379:6379\"\n```\n\nThen install fastapi-cache2:\n```bash\n$ pip install fastapi-cache2[redis]\n```", "tokens_output": 180, "model": "claude-sonnet-4-20250514"}
+    ]
+  },
+  {
+    "id": "sample-002",
+    "source": "cursor",
+    "title": "React Component Bug Fix - useState Error",
+    "created_at": "2026-08-16T14:20:00Z",
+    "updated_at": "2026-08-16T14:45:00Z",
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "My React component throws an error: TypeError: Cannot read properties of null (reading 'useState'). What's wrong?", "tokens_input": 35},
+      {"role": "assistant", "content": "This error usually means you're calling useState outside a React component or have a React version mismatch. Check:\n\n1. Ensure you're importing useState correctly:\n```jsx\nimport React, { useState } from 'react';\n```\n\n2. Make sure the hook is called at the top level of a function component:\n```jsx\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n  // ...\n}\n```\n\n3. Verify you have only one copy of React in your project (duplicate React causes this).\n\nThe most common fix is ensuring React is imported and the hook is inside the component body.", "tokens_output": 280, "model": "gpt-4o"}
+    ]
+  },
+  {
+    "id": "sample-003",
+    "source": "aider",
+    "title": "Implement REST API with Authentication",
+    "created_at": "2026-08-17T09:00:00Z",
+    "updated_at": "2026-08-17T10:30:00Z",
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "Implement a REST API with JWT authentication using FastAPI"},
+      {"role": "assistant", "content": "I'll implement a complete JWT auth system. Here's the main app:\n```python\nfrom fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.security import HTTPBearer, HTTPAuthorizationCredentials\nimport jwt\nfrom datetime import datetime, timedelta\n\napp = FastAPI()\nsecurity = HTTPBearer()\n\nSECRET_KEY = \"your-secret-key\"\nALGORITHM = \"HS256\"\n\ndef create_token(data: dict):\n    to_encode = data.copy()\n    to_encode.update({\"exp\": datetime.utcnow() + timedelta(hours=24)})\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n\nasync def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):\n    try:\n        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])\n        return payload\n    except jwt.PyJWTError:\n        raise HTTPException(status_code=401, detail=\"Invalid token\")\n```\n\nTODO: add refresh token support\nTODO: add rate limiting"},
+      {"role": "user", "content": "Add tests for the auth endpoints"},
+      {"role": "assistant", "content": "Here are the tests:\n```python\nfrom fastapi.testclient import TestClient\nfrom main import app\n\nclient = TestClient(app)\n\ndef test_login():\n    response = client.post(\"/login\", json={\"username\": \"test\", \"password\": \"test\"})\n    assert response.status_code == 200\n    assert \"access_token\" in response.json()\n```"}
+    ]
+  }
+]

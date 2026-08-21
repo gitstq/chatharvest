@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatharvest"
+version = "1.0.0"
+description = "🌾 AI Coding Conversation Harvest & Intelligence Engine — Extract, analyze, search, and unlock value from AI coding assistant conversations"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "ChatHarvest Team"}
+]
+keywords = ["ai", "coding-assistant", "conversation", "extractor", "claude-code", "cursor", "aider", "cline", "chatgpt", "analytics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Text Processing :: General",
+]
+dependencies = []
+
+[project.optional-dependencies]
+web = []
+pdf = ["reportlab>=4.0"]
+full = ["reportlab>=4.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
+[project.scripts]
+chatharvest = "chatharvest.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/gitstq/chatharvest"
+Repository = "https://github.com/gitstq/chatharvest"
+Issues = "https://github.com/gitstq/chatharvest/issues"
+
+[tool.setuptools.packages.find]
+include = ["chatharvest*"]
+
+[tool.setuptools.package-data]
+chatharvest = ["web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

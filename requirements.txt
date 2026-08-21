@@ -1,0 +1,6 @@
+# ChatHarvest - Core Dependencies
+# Zero core dependencies — only Python standard library required
+#
+# Optional dependencies (install as needed):
+#   pip install chatharvest[pdf]   # PDF export support
+#   pip install chatharvest[full]  # All optional features

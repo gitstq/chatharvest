@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌾 ChatHarvest - Conversation Archive</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header { text-align: center; padding: 40px 0; border-bottom: 1px solid #1e293b; margin-bottom: 30px; }
+header h1 { font-size: 2.5em; color: #fbbf24; margin-bottom: 10px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0; }
+.stat-card { background: #1e293b; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #334155; }
+.stat-card .value { font-size: 2em; font-weight: bold; color: #fbbf24; }
+.stat-card .label { color: #94a3b8; font-size: 0.9em; margin-top: 5px; }
+.search-bar { margin: 20px 0; }
+.search-bar input { width: 100%; padding: 15px 20px; font-size: 1.1em; background: #1e293b; border: 2px solid #334155; border-radius: 12px; color: #e2e8f0; outline: none; }
+.search-bar input:focus { border-color: #fbbf24; }
+.filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.filters select { padding: 8px 15px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; cursor: pointer; }
+.conv-list { list-style: none; }
+.conv-item { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; cursor: pointer; transition: all 0.2s; }
+.conv-item:hover { border-color: #fbbf24; transform: translateY(-2px); }
+.conv-item h3 { color: #fbbf24; margin-bottom: 8px; }
+.conv-meta { display: flex; gap: 15px; font-size: 0.85em; color: #94a3b8; flex-wrap: wrap; }
+.conv-meta span { background: #0f172a; padding: 3px 10px; border-radius: 20px; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto; }
+.modal-content { background: #1e293b; max-width: 900px; margin: 30px auto; padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+.modal-close { float: right; font-size: 1.5em; cursor: pointer; color: #94a3b8; }
+.modal-close:hover { color: #fbbf24; }
+.message { margin: 15px 0; padding: 15px; border-radius: 8px; }
+.message.user { background: #1e3a5f; border-left: 4px solid #3b82f6; }
+.message.assistant { background: #1a2e1a; border-left: 4px solid #22c55e; }
+.message .role { font-weight: bold; margin-bottom: 8px; }
+.message pre { background: #0f172a; padding: 12px; border-radius: 6px; overflow-x: auto; margin-top: 8px; font-size: 0.85em; }
+.highlight { background: #fbbf24; color: #0f172a; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>🌾 ChatHarvest</h1>
+<p>AI Coding Conversation Archive & Intelligence</p>
+</header>
+<div class="stats-grid" id="statsGrid"></div>
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="🔍 Search conversations...">
+</div>
+<div class="filters">
+<select id="sourceFilter"><option value="">All Sources</option></select>
+<select id="sortBy"><option value="date">Sort by Date</option><option value="messages">Sort by Messages</option><option value="tokens">Sort by Tokens</option></select>
+</div>
+<ul class="conv-list" id="convList"></ul>
+</div>
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="modal-close" onclick="closeModal()">&times;</span>
+<div id="modalBody"></div>
+</div>
+</div>
+<script>
+const conversations = [{"id": "sample-001", "source": "claude-code", "title": "Docker Compose Setup for FastAPI", "created_at": "2026-08-15T10:30:00Z", "updated_at": "2026-08-15T11:15:00Z", "model": "claude-sonnet-4-20250514", "tags": [], "metadata": {}, "messages": [{"role": "user", "content": "How do I set up docker compose for a FastAPI app with PostgreSQL?", "timestamp": null, "model": null, "tokens_input": 25, "tokens_output": null, "code_snippets": [], "metadata": {}, "total_tokens": 25, "char_count": 65, "line_count": 1}, {"role": "assistant", "content": "Here's a complete docker-compose.yml setup:\n```yaml\nversion: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    depends_on:\n      - db\n    environment:\n      - DATABASE_URL=postgresql://user:pass@db:5432/app\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_USER=user\n      - POSTGRES_PASSWORD=pass\n      - POSTGRES_DB=app\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:\n```\n\nAnd a Dockerfile:\n```dockerfile\nFROM python:3.12-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\"]\n```", "timestamp": null, "model": "claude-sonnet-4-20250514", "tokens_input": null, "tokens_output": 320, "code_snippets": [{"language": "yaml", "code": "version: '3.8'\nservices:\n  api:\n    build: .\n    ports:\n      - \"8000:8000\"\n    depends_on:\n      - db\n    environment:\n      - DATABASE_URL=postgresql://user:pass@db:5432/app\n  db:\n    image: postgres:16\n    environment:\n      - POSTGRES_USER=user\n      - POSTGRES_PASSWORD=pass\n      - POSTGRES_DB=app\n    volumes:\n      - pgdata:/var/lib/postgresql/data\nvolumes:\n  pgdata:", "filename": null, "line_start": null}, {"language": "dockerfile", "code": "FROM python:3.12-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\"]", "filename": null, "line_start": null}], "metadata": {}, "total_tokens": 320, "char_count": 621, "line_count": 33}, {"role": "user", "content": "How do I add Redis for caching?", "timestamp": null, "model": null, "tokens_input": 15, "tokens_output": null, "code_snippets": [], "metadata": {}, "total_tokens": 15, "char_count": 31, "line_count": 1}, {"role": "assistant", "content": "Add a Redis service to your docker-compose.yml:\n```yaml\n  redis:\n    image: redis:7-alpine\n    ports:\n      - \"6379:6379\"\n```\n\nThen install fastapi-cache2:\n```bash\n$ pip install fastapi-cache2[redis]\n```", "timestamp": null, "model": "claude-sonnet-4-20250514", "tokens_input": null, "tokens_output": 180, "code_snippets": [{"language": "yaml", "code": "  redis:\n    image: redis:7-alpine\n    ports:\n      - \"6379:6379\"", "filename": null, "line_start": null}, {"language": "bash", "code": "$ pip install fastapi-cache2[redis]", "filename": null, "line_start": null}], "metadata": {}, "total_tokens": 180, "char_count": 203, "line_count": 12}], "content_hash": "5bc16148e9d1da16", "stats": {"message_count": 4, "user_messages": 2, "assistant_messages": 2, "total_tokens": 540, "total_chars": 920, "code_snippet_count": 4, "languages_used": ["bash", "dockerfile", "yaml"], "duration_seconds": 2700.0, "estimated_cost_usd": 0.00762}}, {"id": "sample-002", "source": "cursor", "title": "React Component Bug Fix - useState Error", "created_at": "2026-08-16T14:20:00Z", "updated_at": "2026-08-16T14:45:00Z", "model": "gpt-4o", "tags": [], "metadata": {}, "messages": [{"role": "user", "content": "My React component throws an error: TypeError: Cannot read properties of null (reading 'useState'). What's wrong?", "timestamp": null, "model": null, "tokens_input": 35, "tokens_output": null, "code_snippets": [], "metadata": {}, "total_tokens": 35, "char_count": 113, "line_count": 1}, {"role": "assistant", "content": "This error usually means you're calling useState outside a React component or have a React version mismatch. Check:\n\n1. Ensure you're importing useState correctly:\n```jsx\nimport React, { useState } from 'react';\n```\n\n2. Make sure the hook is called at the top level of a function component:\n```jsx\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n  // ...\n}\n```\n\n3. Verify you have only one copy of React in your project (duplicate React causes this).\n\nThe most common fix is ensuring React is imported and the hook is inside the component body.", "timestamp": null, "model": "gpt-4o", "tokens_input": null, "tokens_output": 280, "code_snippets": [{"language": "jsx", "code": "import React, { useState } from 'react';", "filename": null, "line_start": null}, {"language": "jsx", "code": "function MyComponent() {\n  const [count, setCount] = useState(0);\n  // ...\n}", "filename": null, "line_start": null}], "metadata": {}, "total_tokens": 280, "char_count": 562, "line_count": 18}], "content_hash": "49fc29d115a37f1a", "stats": {"message_count": 2, "user_messages": 1, "assistant_messages": 1, "total_tokens": 315, "total_chars": 675, "code_snippet_count": 2, "languages_used": ["jsx"], "duration_seconds": 1500.0, "estimated_cost_usd": 0.004305}}, {"id": "sample-003", "source": "aider", "title": "Implement REST API with Authentication", "created_at": "2026-08-17T09:00:00Z", "updated_at": "2026-08-17T10:30:00Z", "model": "gpt-4o", "tags": [], "metadata": {}, "messages": [{"role": "user", "content": "Implement a REST API with JWT authentication using FastAPI", "timestamp": null, "model": null, "tokens_input": null, "tokens_output": null, "code_snippets": [], "metadata": {}, "total_tokens": 0, "char_count": 58, "line_count": 1}, {"role": "assistant", "content": "I'll implement a complete JWT auth system. Here's the main app:\n```python\nfrom fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.security import HTTPBearer, HTTPAuthorizationCredentials\nimport jwt\nfrom datetime import datetime, timedelta\n\napp = FastAPI()\nsecurity = HTTPBearer()\n\nSECRET_KEY = \"your-secret-key\"\nALGORITHM = \"HS256\"\n\ndef create_token(data: dict):\n    to_encode = data.copy()\n    to_encode.update({\"exp\": datetime.utcnow() + timedelta(hours=24)})\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n\nasync def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):\n    try:\n        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])\n        return payload\n    except jwt.PyJWTError:\n        raise HTTPException(status_code=401, detail=\"Invalid token\")\n```\n\nTODO: add refresh token support\nTODO: add rate limiting", "timestamp": null, "model": null, "tokens_input": null, "tokens_output": null, "code_snippets": [{"language": "python", "code": "from fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.security import HTTPBearer, HTTPAuthorizationCredentials\nimport jwt\nfrom datetime import datetime, timedelta\n\napp = FastAPI()\nsecurity = HTTPBearer()\n\nSECRET_KEY = \"your-secret-key\"\nALGORITHM = \"HS256\"\n\ndef create_token(data: dict):\n    to_encode = data.copy()\n    to_encode.update({\"exp\": datetime.utcnow() + timedelta(hours=24)})\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n\nasync def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):\n    try:\n        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])\n        return payload\n    except jwt.PyJWTError:\n        raise HTTPException(status_code=401, detail=\"Invalid token\")", "filename": null, "line_start": null}], "metadata": {}, "total_tokens": 0, "char_count": 915, "line_count": 28}, {"role": "user", "content": "Add tests for the auth endpoints", "timestamp": null, "model": null, "tokens_input": null, "tokens_output": null, "code_snippets": [], "metadata": {}, "total_tokens": 0, "char_count": 32, "line_count": 1}, {"role": "assistant", "content": "Here are the tests:\n```python\nfrom fastapi.testclient import TestClient\nfrom main import app\n\nclient = TestClient(app)\n\ndef test_login():\n    response = client.post(\"/login\", json={\"username\": \"test\", \"password\": \"test\"})\n    assert response.status_code == 200\n    assert \"access_token\" in response.json()\n```", "timestamp": null, "model": null, "tokens_input": null, "tokens_output": null, "code_snippets": [{"language": "python", "code": "from fastapi.testclient import TestClient\nfrom main import app\n\nclient = TestClient(app)\n\ndef test_login():\n    response = client.post(\"/login\", json={\"username\": \"test\", \"password\": \"test\"})\n    assert response.status_code == 200\n    assert \"access_token\" in response.json()", "filename": null, "line_start": null}], "metadata": {}, "total_tokens": 0, "char_count": 309, "line_count": 12}], "content_hash": "2393b6599916818d", "stats": {"message_count": 4, "user_messages": 2, "assistant_messages": 2, "total_tokens": 0, "total_chars": 1314, "code_snippet_count": 2, "languages_used": ["python"], "duration_seconds": 5400.0, "estimated_cost_usd": null}}];
+const stats = {"total_conversations": 3, "total_messages": 10, "total_tokens": 855, "total_chars": 2909, "total_code_snippets": 8, "estimated_total_cost_usd": 0.0119, "conversations_by_source": {"claude-code": 1, "cursor": 1, "aider": 1}, "conversations_by_model": {"gpt-4o": 2, "claude-sonnet-4-20250514": 1}, "languages_used": {"bash": 1, "dockerfile": 1, "yaml": 1, "jsx": 1, "python": 1}, "busiest_days": {"2026-08-15": 1, "2026-08-16": 1, "2026-08-17": 1}, "busiest_hours": {"9": 1, "10": 1, "14": 1}, "avg_messages_per_conversation": 3.3, "avg_tokens_per_conversation": 285.0, "top_conversations_by_tokens": [{"title": "Docker Compose Setup for FastAPI", "source": "claude-code", "tokens": 540, "messages": 4}, {"title": "React Component Bug Fix - useState Error", "source": "cursor", "tokens": 315, "messages": 2}, {"title": "Implement REST API with Authentication", "source": "aider", "tokens": 0, "messages": 4}], "top_conversations_by_messages": [{"title": "Docker Compose Setup for FastAPI", "source": "claude-code", "messages": 4, "tokens": 540}, {"title": "Implement REST API with Authentication", "source": "aider", "messages": 4, "tokens": 0}, {"title": "React Component Bug Fix - useState Error", "source": "cursor", "messages": 2, "tokens": 315}]};
+
+function renderStats() {
+const grid = document.getElementById('statsGrid');
+const items = [
+{value: stats.total_conversations || conversations.length, label: 'Conversations'},
+{value: (stats.total_messages || 0).toLocaleString(), label: 'Messages'},
+{value: (stats.total_tokens || 0).toLocaleString(), label: 'Tokens'},
+{value: '$' + (stats.estimated_total_cost_usd || 0).toFixed(2), label: 'Est. Cost'},
+];
+grid.innerHTML = items.map(i => `<div class="stat-card"><div class="value">${i.value}</div><div class="label">${i.label}</div></div>`).join('');
+}
+
+function renderList(filtered) {
+const list = document.getElementById('convList');
+list.innerHTML = filtered.map((c, i) => `
+<li class="conv-item" onclick="openModal('${c.id}')">
+<h3>${c.title}</h3>
+<div class="conv-meta">
+<span>📡 ${c.source}</span>
+<span>💬 ${c.stats ? c.stats.message_count : c.messages.length} msgs</span>
+<span>🔢 ${c.stats ? c.stats.total_tokens.toLocaleString() : 0} tokens</span>
+<span>📅 ${c.created_at ? c.created_at.substring(0,10) : 'N/A'}</span>
+</div>
+</li>`).join('');
+}
+
+function filterConversations() {
+const query = document.getElementById('searchInput').value.toLowerCase();
+const source = document.getElementById('sourceFilter').value;
+const sortBy = document.getElementById('sortBy').value;
+let filtered = conversations.filter(c => {
+const matchQuery = !query || c.title.toLowerCase().includes(query) ||
+c.messages.some(m => (m.content||'').toLowerCase().includes(query));
+const matchSource = !source || c.source === source;
+return matchQuery && matchSource;
+});
+filtered.sort((a,b) => {
+if (sortBy === 'messages') return (b.stats?b.stats.message_count:0) - (a.stats?a.stats.message_count:0);
+if (sortBy === 'tokens') return (b.stats?b.stats.total_tokens:0) - (a.stats?a.stats.total_tokens:0);
+return (b.created_at||'').localeCompare(a.created_at||'');
+});
+renderList(filtered);
+}
+
+function openModal(id) {
+const conv = conversations.find(c => c.id === id);
+if (!conv) return;
+const body = document.getElementById('modalBody');
+body.innerHTML = `<h2 style="color:#fbbf24;margin-bottom:15px">${conv.title}</h2>
+<div class="conv-meta" style="margin-bottom:20px">
+<span>📡 ${conv.source}</span>
+<span>🤖 ${conv.model || 'N/A'}</span>
+<span>📅 ${conv.created_at || 'N/A'}</span>
+</div>` + conv.messages.map(m => `
+<div class="message ${m.role}">
+<div class="role">${m.role === 'user' ? '🧑 User' : m.role === 'assistant' ? '🤖 Assistant' : '⚙️ ' + m.role}</div>
+<div>${(m.content||'').replace(/\n/g, '<br>')}</div>
+</div>`).join('');
+document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+document.getElementById('searchInput').addEventListener('input', filterConversations);
+document.getElementById('sourceFilter').addEventListener('change', filterConversations);
+document.getElementById('sortBy').addEventListener('change', filterConversations);
+document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') closeModal(); });
+
+// Populate source filter
+const sources = [...new Set(conversations.map(c => c.source))];
+document.getElementById('sourceFilter').innerHTML = '<option value="">All Sources</option>' +
+sources.map(s => `<option value="${s}">${s}</option>`).join('');
+
+renderStats();
+renderList(conversations);
+</script>
+</body>
+</html>
